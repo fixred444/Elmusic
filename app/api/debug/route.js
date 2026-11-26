@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 // Diagnosa: buka /api/debug untuk melihat apakah Audius bisa dijangkau dan apakah lagunya terbaca.
 export async function GET() {
-  const info = { apiKeySet: !!process.env.AUDIUS_API_KEY };
+  const info = { apiKeySet: !!process.env.AUDIUS_API_KEY, youtubeKeySet: !!process.env.YOUTUBE_API_KEY };
 
   // data mentah lagu pertama
   try {
