@@ -10,7 +10,10 @@ import { IconClose, IconPlay, IconSearch } from '@/components/Icons';
 export default function SearchPage() {
   const { play } = useApp();
   const [q, setQ] = useState('');
-  const [res, setRes] = useState(null);
+  const [res, setRes] = useState(null); // Audius / iTunes
+  const [ytRes, setYtRes] = useState([]);
+  const [ytOff, setYtOff] = useState(false);
+  const [ytErr, setYtErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [source, setSource] = useState('audius');
@@ -19,35 +22,45 @@ export default function SearchPage() {
     const term = q.trim();
     if (!term) {
       setRes(null);
+      setYtRes([]);
       setBusy(false);
       setErr('');
       return;
     }
     setBusy(true);
     const ctrl = new AbortController();
-    const id = setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: ctrl.signal })
-        .then((r) => r.json())
-        .then((d) => {
-          setRes(d.tracks || []);
-          setSource(d.source || 'audius');
-          setErr(d.error || '');
-          setBusy(false);
-        })
-        .catch((e) => {
-          if (e.name !== 'AbortError') {
-            setErr('Koneksi bermasalah. Coba lagi.');
-            setBusy(false);
-          }
-        });
-    }, 350);
+    const id = setTimeout(async () => {
+      const get = (url) => fetch(url, { signal: ctrl.signal }).then((r) => r.json()).catch((e) => {
+        if (e.name === 'AbortError') throw e;
+        return { tracks: [], error: 'Koneksi bermasalah. Coba lagi.' };
+      });
+      try {
+        const [a, y] = await Promise.all([
+          get(`/api/search?q=${encodeURIComponent(term)}`),
+          get(`/api/yt-search?q=${encodeURIComponent(term)}`),
+        ]);
+        setRes(a.tracks || []);
+        setSource(a.source || 'audius');
+        setErr(a.error || '');
+        setYtRes(y.tracks || []);
+        setYtOff(!!y.disabled);
+        setYtErr(y.error || '');
+        setBusy(false);
+      } catch (e) {
+        /* dibatalkan karena pengetikan berikutnya */
+      }
+    }, 400);
     return () => {
       clearTimeout(id);
       ctrl.abort();
     };
   }, [q]);
 
-  const top = res?.[0];
+  const hasYt = ytRes.length > 0;
+  const hasRes = !!res && res.length > 0;
+  const topList = hasYt ? ytRes : res;
+  const top = topList?.[0];
+  const nothing = !busy && res && !hasRes && !hasYt;
 
   return (
     <div className="page">
@@ -97,19 +110,26 @@ export default function SearchPage() {
         </div>
       )}
 
-      {!busy && err && <div className="empty"><h3>{err}</h3></div>}
+      {!busy && q.trim() && ytOff && (
+        <p className="src-note" style={{ marginTop: 18 }}>
+          Pencarian lagu populer (YouTube) belum aktif. Pasang YOUTUBE_API_KEY di Vercel untuk mengaktifkannya.
+        </p>
+      )}
+      {!busy && q.trim() && ytErr && <p className="src-note" style={{ marginTop: 18 }}>{ytErr}</p>}
 
-      {!busy && res && res.length === 0 && !err && (
+      {!busy && err && !hasYt && <div className="empty"><h3>{err}</h3></div>}
+
+      {nothing && !err && (
         <div className="empty">
           <h3>Tidak ada hasil untuk &ldquo;{q.trim()}&rdquo;</h3>
           <p>Coba kata kunci lain atau periksa ejaannya.</p>
         </div>
       )}
 
-      {!busy && res && res.length > 0 && (
+      {!busy && top && (
         <>
           <section className="top-result">
-            <button className="top-card glass" onClick={() => play(top, res)}>
+            <button className="top-card glass" onClick={() => play(top, topList)}>
               <Art src={top.art} id={top.id} className="top-art" />
               <span className="top-text">
                 <span className="eyebrow">Hasil teratas</span>
@@ -119,13 +139,28 @@ export default function SearchPage() {
               <span className="top-play"><IconPlay size={22} /></span>
             </button>
           </section>
-          <section className="shelf" style={{ marginTop: 28 }}>
-            <div className="shelf-h">
-              <h2>Lagu</h2>
-              {source === 'itunes' && <p className="src-note">Tidak ada lagu penuh untuk pencarian ini. Menampilkan cuplikan 30 detik dari iTunes.</p>}
-            </div>
-            <TrackList tracks={res} />
-          </section>
+
+          {hasYt && (
+            <section className="shelf" style={{ marginTop: 28 }}>
+              <div className="shelf-h">
+                <h2>Lagu populer</h2>
+                <p className="src-note">Diputar penuh lewat YouTube.</p>
+              </div>
+              <TrackList tracks={ytRes} />
+            </section>
+          )}
+
+          {hasRes && (
+            <section className="shelf" style={{ marginTop: 28 }}>
+              <div className="shelf-h">
+                <h2>{hasYt ? 'Musik independen' : 'Lagu'}</h2>
+                {source === 'itunes' && (
+                  <p className="src-note">Tidak ada lagu penuh untuk pencarian ini. Menampilkan cuplikan 30 detik dari iTunes.</p>
+                )}
+              </div>
+              <TrackList tracks={res} />
+            </section>
+          )}
         </>
       )}
     </div>
