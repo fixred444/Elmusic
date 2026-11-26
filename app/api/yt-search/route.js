@@ -57,6 +57,7 @@ export async function GET(req) {
           artist,
           album: 'YouTube',
           art: i.snippet.thumbnails?.medium?.url || `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+          artSm: i.snippet.thumbnails?.default?.url || i.snippet.thumbnails?.medium?.url || null,
           preview: null,
           full: true,
         };
