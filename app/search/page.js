@@ -8,7 +8,7 @@ import TrackList from '@/components/TrackList';
 import { IconClose, IconPlay, IconSearch } from '@/components/Icons';
 
 export default function SearchPage() {
-  const { play } = useApp();
+  const { play, warmYt } = useApp();
   const [q, setQ] = useState('');
   const [res, setRes] = useState(null); // Audius / iTunes
   const [ytRes, setYtRes] = useState([]);
@@ -28,6 +28,7 @@ export default function SearchPage() {
       return;
     }
     setBusy(true);
+    warmYt();
     const ctrl = new AbortController();
     const id = setTimeout(async () => {
       const get = (url) => fetch(url, { signal: ctrl.signal }).then((r) => r.json()).catch((e) => {
@@ -54,7 +55,7 @@ export default function SearchPage() {
       clearTimeout(id);
       ctrl.abort();
     };
-  }, [q]);
+  }, [q, warmYt]);
 
   const hasYt = ytRes.length > 0;
   const hasRes = !!res && res.length > 0;
@@ -65,7 +66,7 @@ export default function SearchPage() {
   return (
     <div className="page">
       <h1 className="page-title">Cari</h1>
-      <label className="searchbox glass">
+      <label className="searchbox">
         <IconSearch size={22} />
         <input
           autoFocus
@@ -91,7 +92,7 @@ export default function SearchPage() {
                 <button
                   key={g.name}
                   className="genre"
-                  style={{ background: `linear-gradient(150deg, hsl(${h} 38% 30%), hsl(${(h + 40) % 360} 42% 14%))` }}
+                  style={{ background: `hsl(${h} 26% 26%)` }}
                   onClick={() => setQ(g.term)}
                 >
                   {g.name}
@@ -129,7 +130,7 @@ export default function SearchPage() {
       {!busy && top && (
         <>
           <section className="top-result">
-            <button className="top-card glass" onClick={() => play(top, topList)}>
+            <button className="top-card" onClick={() => play(top, topList)}>
               <Art src={top.art} id={top.id} className="top-art" />
               <span className="top-text">
                 <span className="eyebrow">Hasil teratas</span>
