@@ -2,6 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import { yt, ytPlay, ytPause, ytResume, ytStop, ytSeek, ytVolume, ytState, ytTime } from './yt';
+
 const AppCtx = createContext(null);
 const TimeCtx = createContext({ time: 0, duration: 0 });
 export const useApp = () => useContext(AppCtx);
@@ -37,11 +39,21 @@ function TimeProvider({ children }) {
   const [s, setS] = useState({ time: 0, duration: 0 });
   useEffect(() => {
     const a = getAudio();
-    const upd = () =>
+    const upd = () => {
+      if (yt.active) return;
       setS({ time: a.currentTime || 0, duration: isFinite(a.duration) ? a.duration : 0 });
+    };
     const evs = ['timeupdate', 'loadedmetadata', 'durationchange', 'emptied'];
     evs.forEach((e) => a.addEventListener(e, upd));
-    return () => evs.forEach((e) => a.removeEventListener(e, upd));
+    const iv = setInterval(() => {
+      if (!yt.active) return;
+      const n = ytTime();
+      setS((p) => (p.time === n.time && p.duration === n.duration ? p : n));
+    }, 400);
+    return () => {
+      evs.forEach((e) => a.removeEventListener(e, upd));
+      clearInterval(iv);
+    };
   }, []);
   return <TimeCtx.Provider value={s}>{children}</TimeCtx.Provider>;
 }
@@ -65,8 +77,29 @@ export function AppProvider({ children }) {
   const [hydrated, setHydrated] = useState(false);
 
   const st = useRef({});
-  st.current = { queue, index, repeat, shuffle };
+  st.current = { queue, index, repeat, shuffle, volume, muted };
   const nextRef = useRef(() => {});
+  const ytHandlers = useRef({
+    state: (s) => {
+      if (!yt.active) return;
+      if (s === 1) {
+        setPlaying(true);
+        setBuffering(false);
+      } else if (s === 2) setPlaying(false);
+      else if (s === 3) setBuffering(true);
+      else if (s === 0) {
+        setPlaying(false);
+        nextRef.current(true);
+      }
+    },
+    error: () => {
+      if (!yt.active) return;
+      setBuffering(false);
+      setPlaying(false);
+      setError('Video ini tidak bisa diputar di El Music. Lanjut ke lagu berikutnya…');
+      setTimeout(() => nextRef.current(true), 1500);
+    },
+  });
 
   const current = index >= 0 ? queue[index] : null;
 
@@ -110,6 +143,7 @@ export function AppProvider({ children }) {
     if (!a) return;
     a.volume = volume;
     a.muted = muted;
+    ytVolume(volume, muted);
   }, [volume, muted]);
 
   const loadAt = useCallback((q, i) => {
@@ -119,10 +153,22 @@ export function AppProvider({ children }) {
     setQueue(q);
     setIndex(i);
     setError('');
-    a.src = t.preview;
-    a.load();
-    const p = a.play();
-    if (p) p.catch(() => setPlaying(false));
+    if (t.yt) {
+      a.pause();
+      setBuffering(true);
+      ytPlay(t.yt, ytHandlers.current)
+        .then(() => ytVolume(st.current.volume, st.current.muted))
+        .catch(() => {
+          setBuffering(false);
+          setError('Gagal memuat pemutar YouTube');
+        });
+    } else {
+      ytStop();
+      a.src = t.preview;
+      a.load();
+      const p = a.play();
+      if (p) p.catch(() => setPlaying(false));
+    }
     setRecent((prev) => [t, ...prev.filter((x) => x.id !== t.id)].slice(0, 20));
   }, []);
 
@@ -141,8 +187,13 @@ export function AppProvider({ children }) {
       const { queue, index, repeat, shuffle } = st.current;
       if (!a || !queue.length) return;
       if (auto && repeat === 'one') {
-        a.currentTime = 0;
-        a.play().catch(() => {});
+        if (yt.active) {
+          ytSeek(0);
+          ytResume();
+        } else {
+          a.currentTime = 0;
+          a.play().catch(() => {});
+        }
         return;
       }
       let i;
@@ -158,6 +209,7 @@ export function AppProvider({ children }) {
         else {
           a.pause();
           a.currentTime = 0;
+          ytStop();
           return;
         }
       }
@@ -171,8 +223,10 @@ export function AppProvider({ children }) {
     const a = getAudio();
     const { queue, index } = st.current;
     if (!a || !queue.length) return;
-    if (a.currentTime > 3) {
-      a.currentTime = 0;
+    const cur = yt.active ? ytTime().time : a.currentTime;
+    if (cur > 3) {
+      if (yt.active) ytSeek(0);
+      else a.currentTime = 0;
       return;
     }
     loadAt(queue, index <= 0 ? queue.length - 1 : index - 1);
@@ -181,11 +235,20 @@ export function AppProvider({ children }) {
   const toggle = useCallback(() => {
     const a = getAudio();
     if (!a || !st.current.queue.length) return;
+    if (yt.active) {
+      if (ytState() === 1) ytPause();
+      else ytResume();
+      return;
+    }
     if (a.paused) a.play().catch(() => {});
     else a.pause();
   }, []);
 
   const seek = useCallback((t) => {
+    if (yt.active) {
+      ytSeek(t);
+      return;
+    }
     const a = getAudio();
     if (a && isFinite(t)) a.currentTime = t;
   }, []);
@@ -290,8 +353,8 @@ export function AppProvider({ children }) {
         album: current.album,
         artwork: current.art ? [{ src: current.art, sizes: '600x600', type: 'image/jpeg' }] : [],
       });
-      navigator.mediaSession.setActionHandler('play', () => getAudio().play().catch(() => {}));
-      navigator.mediaSession.setActionHandler('pause', () => getAudio().pause());
+      navigator.mediaSession.setActionHandler('play', () => (yt.active ? ytResume() : getAudio().play().catch(() => {})));
+      navigator.mediaSession.setActionHandler('pause', () => (yt.active ? ytPause() : getAudio().pause()));
       navigator.mediaSession.setActionHandler('nexttrack', () => nextRef.current(false));
       navigator.mediaSession.setActionHandler('previoustrack', () => prev());
     } catch {}
