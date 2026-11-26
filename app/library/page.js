@@ -39,7 +39,7 @@ export default function Library() {
 
       {naming && (
         <form
-          className="inline-form glass"
+          className="inline-form"
           onSubmit={(e) => {
             e.preventDefault();
             createPlaylist(name);
