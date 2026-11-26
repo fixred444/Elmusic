@@ -403,3 +403,5 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+.src-note { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
