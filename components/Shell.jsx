@@ -18,6 +18,9 @@ export default function Shell({ children }) {
       <PlayerBar />
       <NowPlaying />
       <MenuHost />
+      <div className="yt-wrap" aria-hidden="true">
+        <div id="yt-holder" />
+      </div>
     </>
   );
 }
