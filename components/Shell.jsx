@@ -6,6 +6,7 @@ import MobileNav from './MobileNav';
 import PlayerBar from './PlayerBar';
 import NowPlaying from './NowPlaying';
 import MenuHost from './MenuHost';
+import Toast from './Toast';
 
 export default function Shell({ children }) {
   return (
@@ -18,6 +19,7 @@ export default function Shell({ children }) {
       <PlayerBar />
       <NowPlaying />
       <MenuHost />
+      <Toast />
       <div className="yt-wrap" aria-hidden="true">
         <div id="yt-holder" />
       </div>
