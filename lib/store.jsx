@@ -92,12 +92,19 @@ export function AppProvider({ children }) {
         nextRef.current(true);
       }
     },
-    error: () => {
+    error: (code) => {
       if (!yt.active) return;
       setBuffering(false);
       setPlaying(false);
-      setError('Video ini tidak bisa diputar di El Music. Lanjut ke lagu berikutnya…');
-      setTimeout(() => nextRef.current(true), 1500);
+      setError(
+        code === 101 || code === 150
+          ? 'Pemilik video melarang diputar di luar YouTube. Coba lagu lain.'
+          : code === 153
+          ? 'YouTube menolak pemutar tertanam (kode 153).'
+          : code === 100
+          ? 'Video tidak ditemukan.'
+          : `Video tidak bisa diputar (kode ${code}).`
+      );
     },
   });
 
