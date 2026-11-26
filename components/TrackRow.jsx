@@ -37,7 +37,7 @@ export default function TrackRow({ track, list, index, onRemove }) {
         <span className="hp"><IconPlay size={16} /></span>
       </div>
       <div className="row-main">
-        <Art src={track.art} id={track.id} className="row-art" />
+        <Art src={track.artSm || track.art} id={track.id} className="row-art" />
         <div className="row-text">
           <div className="row-title">{track.title}</div>
           <div className="row-sub">{track.artist}</div>

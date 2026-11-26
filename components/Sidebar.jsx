@@ -28,7 +28,7 @@ export default function Sidebar() {
   const fileRef = useRef(null);
 
   return (
-    <aside className="sidebar glass">
+    <aside className="sidebar">
       <Logo />
       <nav className="nav">
         {NAV.map(({ href, label, Icon }) => {

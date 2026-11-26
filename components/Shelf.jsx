@@ -8,11 +8,11 @@ import { IconPause, IconPlay } from './Icons';
 export function ShelfSkeleton() {
   return (
     <section className="shelf">
-      <div className="sk" style={{ width: 220, height: 30, marginBottom: 18 }} />
+      <div className="sk" style={{ width: 200, height: 24, marginBottom: 14 }} />
       <div className="rail">
         {Array.from({ length: 7 }).map((_, i) => (
           <div key={i}>
-            <div className="sk" style={{ aspectRatio: '1', borderRadius: 16 }} />
+            <div className="sk" style={{ aspectRatio: '1', borderRadius: 8 }} />
             <div className="sk" style={{ height: 12, width: '70%', marginTop: 12, borderRadius: 6 }} />
             <div className="sk" style={{ height: 10, width: '45%', marginTop: 8, borderRadius: 6 }} />
           </div>
@@ -40,11 +40,11 @@ export default function Shelf({ title, tracks }) {
             >
               <div className="card-art">
                 <Art src={t.art} id={t.id} />
-                <span className="card-play glass">
+                <span className="card-play">
                   {active && playing ? <IconPause size={18} /> : <IconPlay size={18} />}
                 </span>
                 {active && playing && (
-                  <span className="card-eq glass"><Eq /></span>
+                  <span className="card-eq"><Eq /></span>
                 )}
               </div>
               <div className="card-t">{t.title}</div>

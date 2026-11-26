@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useApp, useTime } from '@/lib/store';
-import { fmt } from '@/lib/util';
+import { fmt, hueOf } from '@/lib/util';
 import Art from './Art';
 import Slider from './Slider';
 import { Eq } from './TrackRow';
@@ -29,7 +29,7 @@ export default function NowPlaying() {
 
   return (
     <section className={`np ${expanded ? 'open' : ''}`} aria-hidden={!expanded} aria-label="Sedang diputar">
-      <div className="np-bg">{current?.art && <img key={current.art} src={current.art} alt="" />}</div>
+      <div className="np-bg" style={{ '--h': current ? hueOf(current.id) : 0 }} />
 
       <div className="np-top">
         <button className="ic glass-btn" onClick={() => setExpanded(false)} aria-label="Tutup">
@@ -45,7 +45,7 @@ export default function NowPlaying() {
             <Art src={current.art} id={current.id} />
           </div>
 
-          <div className="np-side glass">
+          <div className="np-side">
             <div className="np-info">
               <div className="np-text">
                 <h2>{current.title}</h2>
@@ -82,7 +82,7 @@ export default function NowPlaying() {
                 <div className="np-q-h">Antrean</div>
                 {upcoming.slice(0, 40).map(({ t, i }) => (
                   <button key={`${t.id}-${i}`} className="q-i" onClick={() => jumpTo(i)}>
-                    <Art src={t.art} id={t.id} className="q-art" />
+                    <Art src={t.artSm || t.art} id={t.id} className="q-art" />
                     <span className="q-t">
                       <b>{t.title}</b>
                       <small>{t.artist}</small>

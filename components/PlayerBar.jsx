@@ -24,7 +24,7 @@ export default function PlayerBar() {
     <footer className={`player glass ${has ? '' : 'no-track'}`}>
       <div className="p-left">
         <button className="p-art" onClick={() => has && setExpanded(true)} aria-label="Buka layar pemutar" disabled={!has}>
-          <Art src={current?.art} id={current?.id || 'kosong'} />
+          <Art src={current?.artSm || current?.art} id={current?.id || 'kosong'} />
         </button>
         <div className="p-meta">
           {has ? (

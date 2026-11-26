@@ -3,16 +3,8 @@
 import { useApp } from '@/lib/store';
 import { hueOf } from '@/lib/util';
 
-// Latar yang ikut berubah mengikuti sampul lagu. Kaca di atasnya punya sesuatu untuk dibiaskan.
+// Latar tipis yang warnanya mengikuti lagu. Murni gradien CSS, tanpa gambar/blur berat.
 export default function Ambient() {
   const { current } = useApp();
-  const hue = current ? hueOf(current.id) : 22;
-  return (
-    <div className="ambient" style={{ '--h': hue }} aria-hidden="true">
-      <span className="blob b1" />
-      <span className="blob b2" />
-      <span className="blob b3" />
-      {current?.art && <img key={current.art} src={current.art} alt="" />}
-    </div>
-  );
+  return <div className="ambient" style={{ '--h': current ? hueOf(current.id) : 0, '--s': current ? '34%' : '0%' }} aria-hidden="true" />;
 }
