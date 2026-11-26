@@ -5,6 +5,7 @@ import Shell from '@/components/Shell';
 export const metadata = {
   title: 'El Music',
   description: 'El Music — putar musik dengan tampilan liquid glass.',
+  referrer: 'strict-origin-when-cross-origin',
 };
 
 export const viewport = {
