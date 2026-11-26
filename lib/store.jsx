@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { yt, ytPlay, ytPause, ytResume, ytStop, ytSeek, ytVolume, ytState, ytTime } from './yt';
+import { yt, ytWarm, ytPlay, ytPause, ytResume, ytStop, ytSeek, ytVolume, ytState, ytTime } from './yt';
 
 const AppCtx = createContext(null);
 const TimeCtx = createContext({ time: 0, duration: 0 });
@@ -129,6 +129,14 @@ export function AppProvider({ children }) {
       canplay: () => setBuffering(false),
       ended: () => nextRef.current(true),
       error: () => {
+        const { queue, index } = st.current;
+        const t = queue[index];
+        if (t && t.fallback && !a.src.includes('/api/stream/')) {
+          a.src = t.fallback;
+          a.load();
+          a.play().catch(() => {});
+          return;
+        }
         setBuffering(false);
         setPlaying(false);
         if (a.getAttribute('src')) setError('Lagu ini tidak bisa diputar');
@@ -251,6 +259,10 @@ export function AppProvider({ children }) {
     }
     const a = getAudio();
     if (a && isFinite(t)) a.currentTime = t;
+  }, []);
+
+  const warmYt = useCallback(() => {
+    ytWarm(ytHandlers.current).catch(() => {});
   }, []);
 
   const jumpTo = useCallback((i) => loadAt(st.current.queue, i), [loadAt]);
@@ -387,7 +399,7 @@ export function AppProvider({ children }) {
     play, next, prev, toggle, seek, jumpTo, playNext, addToQueue,
     setVolume, setMuted, toggleShuffle, cycleRepeat,
     toggleLike, createPlaylist, addToPlaylist, removeFromPlaylist, renamePlaylist, deletePlaylist,
-    addFiles, setExpanded, openMenu, closeMenu,
+    addFiles, setExpanded, openMenu, closeMenu, warmYt,
   };
 
   return (
