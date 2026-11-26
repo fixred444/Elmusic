@@ -5,7 +5,7 @@ import { fmt } from '@/lib/util';
 import Art from './Art';
 import Slider from './Slider';
 import {
-  IconHeart, IconNext, IconPause, IconPlay, IconPrev, IconQueue,
+  IconHeart, IconMic, IconNext, IconPause, IconPlay, IconPrev, IconQueue,
   IconRepeat, IconRepeatOne, IconShuffle, IconVolume, IconMute,
 } from './Icons';
 
@@ -14,16 +14,21 @@ export default function PlayerBar() {
     current, playing, buffering, toggle, next, prev,
     shuffle, toggleShuffle, repeat, cycleRepeat,
     volume, setVolume, muted, setMuted, seek,
-    likedIds, toggleLike, setExpanded,
+    likedIds, toggleLike, setExpanded, setNpTab,
   } = useApp();
   const { time, duration } = useTime();
   const has = !!current;
   const liked = has && likedIds.has(current.id);
+  const open = (tab) => {
+    if (!has) return;
+    setNpTab(tab);
+    setExpanded(true);
+  };
 
   return (
     <footer className={`player glass ${has ? '' : 'no-track'}`}>
-      <div className="p-left">
-        <button className="p-art" onClick={() => has && setExpanded(true)} aria-label="Buka layar pemutar" disabled={!has}>
+      <div className="p-left" onClick={() => open('lirik')}>
+        <button className="p-art" aria-label="Buka layar pemutar" disabled={!has}>
           <Art src={current?.artSm || current?.art} id={current?.id || 'kosong'} />
         </button>
         <div className="p-meta">
@@ -37,7 +42,7 @@ export default function PlayerBar() {
           )}
         </div>
         {has && !current.local && (
-          <button className={`ic hide-m ${liked ? 'liked' : ''}`} aria-label="Sukai lagu" onClick={() => toggleLike(current)}>
+          <button className={`ic hide-m ${liked ? 'liked' : ''}`} aria-label="Sukai lagu" onClick={(e) => { e.stopPropagation(); toggleLike(current); }}>
             <IconHeart filled={liked} size={20} />
           </button>
         )}
@@ -73,7 +78,10 @@ export default function PlayerBar() {
           {muted || volume === 0 ? <IconMute size={20} /> : <IconVolume size={20} />}
         </button>
         <Slider className="vol" value={muted ? 0 : volume} max={1} step={0.01} onChange={setVolume} label="Volume" />
-        <button className="ic" aria-label="Buka antrean" onClick={() => has && setExpanded(true)}>
+        <button className="ic" aria-label="Lihat lirik" onClick={() => open('lirik')} disabled={!has}>
+          <IconMic size={20} />
+        </button>
+        <button className="ic" aria-label="Buka antrean" onClick={() => open('antrean')} disabled={!has}>
           <IconQueue size={20} />
         </button>
       </div>

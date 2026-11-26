@@ -5,7 +5,7 @@ import { useApp } from '@/lib/store';
 
 // Pesan error singkat (mis. video YouTube yang menolak diputar), terlihat dari layar mana pun.
 export default function Toast() {
-  const { error } = useApp();
+  const { error, next, queue } = useApp();
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
@@ -14,10 +14,24 @@ export default function Toast() {
       return;
     }
     setMsg(error);
-    const t = setTimeout(() => setMsg(''), 6000);
+    const t = setTimeout(() => setMsg(''), 8000);
     return () => clearTimeout(t);
   }, [error]);
 
   if (!msg) return null;
-  return <div className="toast" role="status">{msg}</div>;
+  return (
+    <div className="toast" role="status">
+      <span>{msg}</span>
+      {queue.length > 1 && (
+        <button
+          onClick={() => {
+            setMsg('');
+            next(false);
+          }}
+        >
+          Lewati
+        </button>
+      )}
+    </div>
+  );
 }

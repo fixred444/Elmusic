@@ -5,6 +5,7 @@ import { useApp, useTime } from '@/lib/store';
 import { fmt, hueOf } from '@/lib/util';
 import Art from './Art';
 import Slider from './Slider';
+import Lyrics from './Lyrics';
 import { Eq } from './TrackRow';
 import {
   IconDown, IconHeart, IconNext, IconPause, IconPlay, IconPrev,
@@ -15,7 +16,7 @@ export default function NowPlaying() {
   const {
     expanded, setExpanded, current, playing, error, toggle, next, prev,
     shuffle, toggleShuffle, repeat, cycleRepeat, seek,
-    likedIds, toggleLike, queue, index, jumpTo,
+    likedIds, toggleLike, queue, index, jumpTo, npTab, setNpTab,
   } = useApp();
   const { time, duration } = useTime();
 
@@ -25,7 +26,6 @@ export default function NowPlaying() {
   }, [expanded]);
 
   const liked = current && likedIds.has(current.id);
-  const upcoming = queue.map((t, i) => ({ t, i })).filter(({ i }) => i !== index);
 
   return (
     <section className={`np ${expanded ? 'open' : ''}`} aria-hidden={!expanded} aria-label="Sedang diputar">
@@ -45,7 +45,7 @@ export default function NowPlaying() {
             <Art src={current.art} id={current.id} />
           </div>
 
-          <div className="np-side">
+          <div className="np-side" style={{ '--h': hueOf(current.id) }}>
             <div className="np-info">
               <div className="np-text">
                 <h2>{current.title}</h2>
@@ -77,11 +77,18 @@ export default function NowPlaying() {
               </button>
             </div>
 
-            {upcoming.length > 0 && (
+            <div className="np-tabs" role="tablist">
+              <button role="tab" aria-selected={npTab === 'lirik'} className={npTab === 'lirik' ? 'on' : ''} onClick={() => setNpTab('lirik')}>Lirik</button>
+              <button role="tab" aria-selected={npTab === 'antrean'} className={npTab === 'antrean' ? 'on' : ''} onClick={() => setNpTab('antrean')}>Antrean</button>
+            </div>
+
+            {npTab === 'lirik' ? (
+              expanded && <Lyrics track={current} />
+            ) : (
               <div className="np-queue">
-                <div className="np-q-h">Antrean</div>
-                {upcoming.slice(0, 40).map(({ t, i }) => (
-                  <button key={`${t.id}-${i}`} className="q-i" onClick={() => jumpTo(i)}>
+                {queue.length <= 1 && <div className="lyr-msg"><b>Antrean kosong</b><span>Putar lagu dari daftar untuk mengisi antrean.</span></div>}
+                {queue.slice(0, 60).map((t, i) => (
+                  <button key={`${t.id}-${i}`} className={`q-i ${i === index ? 'now' : ''}`} onClick={() => jumpTo(i)}>
                     <Art src={t.artSm || t.art} id={t.id} className="q-art" />
                     <span className="q-t">
                       <b>{t.title}</b>
