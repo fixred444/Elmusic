@@ -309,3 +309,14 @@ input { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+
+/* ---------- nyaman dipakai di WebView / APK ---------- */
+* { -webkit-tap-highlight-color: transparent; }
+html { -webkit-touch-callout: none; }
+body { -webkit-user-select: none; user-select: none; }
+input, textarea { -webkit-user-select: text; user-select: text; }
+button, a, .row, .card, .quick-i, .genre { touch-action: manipulation; outline: none; }
+button:focus-visible, a:focus-visible, .row:focus-visible, .card:focus-visible { outline: none; }
+
+.toast { position: fixed; z-index: 70; left: 50%; transform: translateX(-50%); bottom: calc(var(--player-h) + 28px); max-width: min(92vw, 460px); padding: 10px 16px; border-radius: 12px; background: #2a2a2e; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7); font-size: 14px; font-weight: 600; text-align: center; animation: pop 0.2s var(--ease); }
+@media (max-width: 860px) { .toast { bottom: calc(var(--player-h) + 96px + env(safe-area-inset-bottom)); } }
