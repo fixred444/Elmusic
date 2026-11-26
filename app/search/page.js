@@ -13,6 +13,7 @@ export default function SearchPage() {
   const [res, setRes] = useState(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [source, setSource] = useState('audius');
 
   useEffect(() => {
     const term = q.trim();
@@ -29,6 +30,7 @@ export default function SearchPage() {
         .then((r) => r.json())
         .then((d) => {
           setRes(d.tracks || []);
+          setSource(d.source || 'audius');
           setErr(d.error || '');
           setBusy(false);
         })
@@ -118,7 +120,10 @@ export default function SearchPage() {
             </button>
           </section>
           <section className="shelf" style={{ marginTop: 28 }}>
-            <div className="shelf-h"><h2>Lagu</h2></div>
+            <div className="shelf-h">
+              <h2>Lagu</h2>
+              {source === 'itunes' && <p className="src-note">Tidak ada lagu penuh untuk pencarian ini. Menampilkan cuplikan 30 detik dari iTunes.</p>}
+            </div>
             <TrackList tracks={res} />
           </section>
         </>
