@@ -49,7 +49,7 @@ function TimeProvider({ children }) {
       if (!yt.active) return;
       const n = ytTime();
       setS((p) => (p.time === n.time && p.duration === n.duration ? p : n));
-    }, 400);
+    }, 250);
     return () => {
       evs.forEach((e) => a.removeEventListener(e, upd));
       clearInterval(iv);
@@ -73,6 +73,7 @@ export function AppProvider({ children }) {
   const [recent, setRecent] = useState([]);
   const [locals, setLocals] = useState([]);
   const [expanded, setExpanded] = useState(false);
+  const [npTab, setNpTab] = useState('lirik');
   const [menu, setMenu] = useState(null);
   const [hydrated, setHydrated] = useState(false);
 
@@ -402,7 +403,7 @@ export function AppProvider({ children }) {
     queue, index, current, playing, buffering, error,
     volume, muted, shuffle, repeat,
     liked, likedIds, playlists, recent, locals,
-    expanded, menu,
+    expanded, menu, npTab, setNpTab,
     play, next, prev, toggle, seek, jumpTo, playNext, addToQueue,
     setVolume, setMuted, toggleShuffle, cycleRepeat,
     toggleLike, createPlaylist, addToPlaylist, removeFromPlaylist, renamePlaylist, deletePlaylist,
