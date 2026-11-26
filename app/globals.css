@@ -405,3 +405,5 @@ body::after {
 }
 
 .src-note { margin-top: 6px; font-size: 13px; color: var(--ink-3); }
+
+.yt-wrap { position: fixed; left: -400px; top: 0; width: 200px; height: 200px; opacity: 0.01; pointer-events: none; overflow: hidden; }
