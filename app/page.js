@@ -11,6 +11,7 @@ export default function Home() {
   const { play, recent, toggleLike, likedIds } = useApp();
   const [shelves, setShelves] = useState(null);
   const [failed, setFailed] = useState(false);
+  const [source, setSource] = useState('audius');
   const [hello, setHello] = useState('');
 
   const fetchHome = useCallback(() => {
@@ -18,7 +19,12 @@ export default function Home() {
     setShelves(null);
     fetch('/api/home')
       .then((r) => r.json())
-      .then((d) => (d.shelves?.length ? setShelves(d.shelves) : setFailed(true)))
+      .then((d) => {
+        if (d.shelves?.length) {
+          setSource(d.source || 'audius');
+          setShelves(d.shelves);
+        } else setFailed(true);
+      })
       .catch(() => setFailed(true));
   }, []);
 
@@ -97,7 +103,9 @@ export default function Home() {
       ))}
 
       <p className="footnote">
-        Cuplikan lagu berdurasi 30 detik dari katalog iTunes. Kamu juga bisa memutar file musik sendiri lewat tombol &ldquo;Dari perangkat&rdquo;.
+        {source === 'itunes'
+          ? 'Katalog lagu penuh sedang tidak terjangkau, jadi yang tampil adalah cuplikan 30 detik dari iTunes. Kamu tetap bisa memutar file musik sendiri lewat tombol "Dari perangkat".'
+          : 'Lagu diputar penuh dari katalog musik independen Audius. Hargai senimannya: dengarkan dan bagikan.'}
       </p>
     </div>
   );
