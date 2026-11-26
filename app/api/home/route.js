@@ -17,7 +17,7 @@ export async function GET() {
   // 1) lagu penuh dari Audius
   let shelves = (
     await Promise.all(
-      AUDIUS_SHELVES.map(async (s) => ({ title: s.title, tracks: await safe(() => audiusTrending(s.genre, 20)) }))
+      AUDIUS_SHELVES.map(async (s) => ({ title: s.title, tracks: await safe(() => audiusTrending(s.genre, 16)) }))
     )
   ).filter((s) => s.tracks.length > 0);
   let source = 'audius';
@@ -27,7 +27,7 @@ export async function GET() {
     source = 'itunes';
     shelves = (
       await Promise.all(
-        SHELVES.map(async (s) => ({ title: s.title, tracks: await safe(() => searchTracks(s.term, 20)) }))
+        SHELVES.map(async (s) => ({ title: s.title, tracks: await safe(() => searchTracks(s.term, 16)) }))
       )
     ).filter((s) => s.tracks.length > 0);
   }
