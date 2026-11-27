@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useApp } from '@/lib/store';
 import Cover from '@/components/Cover';
+import AccountChip from '@/components/AccountChip';
 import TrackList from '@/components/TrackList';
 import { IconHeart, IconPlus, IconUpload } from '@/components/Icons';
 
@@ -16,6 +17,7 @@ export default function Library() {
   return (
     <div className="page">
       <h1 className="page-title">Koleksi</h1>
+      <div className="acct-m"><AccountChip /></div>
 
       <div className="hero-btns" style={{ marginBottom: 28 }}>
         <button className="btn btn-primary" onClick={() => setNaming(true)}>
