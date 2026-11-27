@@ -1,5 +1,7 @@
 'use client';
 
+import { fetchHome as loadHome, readHomeCache } from '@/lib/homeCache';
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
 import { hueOf } from '@/lib/util';
@@ -19,10 +21,11 @@ export default function Welcome() {
   // sampul lagu untuk hiasan di layar awal
   useEffect(() => {
     let dead = false;
-    fetch('/api/home')
-      .then((r) => r.json())
+    const c = readHomeCache();
+    if (c) setArts((c.shelves?.[0]?.tracks || []).slice(0, 6).map((t) => t.artSm || t.art || null));
+    loadHome()
       .then((d) => {
-        if (!dead) setArts((d.shelves?.[0]?.tracks || []).slice(0, 6).map((t) => t.art || null));
+        if (!dead) setArts((d.shelves?.[0]?.tracks || []).slice(0, 6).map((t) => t.artSm || t.art || null));
       })
       .catch(() => {});
     return () => {

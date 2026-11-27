@@ -39,7 +39,7 @@ export default function Shelf({ title, tracks }) {
               onClick={() => (active ? toggle() : play(t, tracks))}
             >
               <div className="card-art">
-                <Art src={t.art} id={t.id} />
+                <Art src={t.artSm || t.art} id={t.id} />
                 <span className="card-play">
                   {active && playing ? <IconPause size={18} /> : <IconPlay size={18} />}
                 </span>
