@@ -84,13 +84,22 @@ export function AppProvider({ children }) {
   const st = useRef({});
   st.current = { queue, index, repeat, shuffle, volume, muted };
   const nextRef = useRef(() => {});
+  const wantRef = useRef(false); // true = pengguna memang ingin lagu berjalan
   const ytHandlers = useRef({
     state: (s) => {
       if (!yt.active) return;
       if (s === 1) {
         setPlaying(true);
         setBuffering(false);
-      } else if (s === 2) setPlaying(false);
+      } else if (s === 2) {
+        setPlaying(false);
+        // saat aplikasi di latar, pemutar YouTube kadang menjeda sendiri: lanjutkan bila pengguna tidak menjeda
+        if (document.hidden && wantRef.current) {
+          setTimeout(() => {
+            if (wantRef.current && yt.active) ytResume();
+          }, 150);
+        }
+      }
       else if (s === 3) setBuffering(true);
       else if (s === 0) {
         setPlaying(false);
@@ -145,7 +154,14 @@ export function AppProvider({ children }) {
     const a = getAudio();
     const h = {
       play: () => setPlaying(true),
-      pause: () => setPlaying(false),
+      pause: () => {
+        setPlaying(false);
+        if (document.hidden && wantRef.current && !yt.active && !a.ended) {
+          setTimeout(() => {
+            if (wantRef.current && !yt.active) a.play().catch(() => {});
+          }, 150);
+        }
+      },
       waiting: () => setBuffering(true),
       playing: () => setBuffering(false),
       canplay: () => setBuffering(false),
@@ -180,6 +196,7 @@ export function AppProvider({ children }) {
     const a = getAudio();
     const t = q[i];
     if (!a || !t) return;
+    wantRef.current = true;
     setQueue(q);
     setIndex(i);
     setError('');
@@ -237,6 +254,7 @@ export function AppProvider({ children }) {
       if (i >= queue.length) {
         if (repeat === 'all' || !auto) i = 0;
         else {
+          wantRef.current = false;
           a.pause();
           a.currentTime = 0;
           ytStop();
@@ -266,12 +284,22 @@ export function AppProvider({ children }) {
     const a = getAudio();
     if (!a || !st.current.queue.length) return;
     if (yt.active) {
-      if (ytState() === 1) ytPause();
-      else ytResume();
+      if (ytState() === 1) {
+        wantRef.current = false;
+        ytPause();
+      } else {
+        wantRef.current = true;
+        ytResume();
+      }
       return;
     }
-    if (a.paused) a.play().catch(() => {});
-    else a.pause();
+    if (a.paused) {
+      wantRef.current = true;
+      a.play().catch(() => {});
+    } else {
+      wantRef.current = false;
+      a.pause();
+    }
   }, []);
 
   const seek = useCallback((t) => {
@@ -387,8 +415,16 @@ export function AppProvider({ children }) {
         album: current.album,
         artwork: current.art ? [{ src: current.art, sizes: '600x600', type: 'image/jpeg' }] : [],
       });
-      navigator.mediaSession.setActionHandler('play', () => (yt.active ? ytResume() : getAudio().play().catch(() => {})));
-      navigator.mediaSession.setActionHandler('pause', () => (yt.active ? ytPause() : getAudio().pause()));
+      navigator.mediaSession.setActionHandler('play', () => {
+        wantRef.current = true;
+        if (yt.active) ytResume();
+        else getAudio().play().catch(() => {});
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        wantRef.current = false;
+        if (yt.active) ytPause();
+        else getAudio().pause();
+      });
       navigator.mediaSession.setActionHandler('nexttrack', () => nextRef.current(false));
       navigator.mediaSession.setActionHandler('previoustrack', () => prev());
     } catch {}
@@ -412,6 +448,33 @@ export function AppProvider({ children }) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [toggle, next, prev]);
+
+  // ---- jembatan ke aplikasi Android (Flutter WebView)
+  useEffect(() => {
+    window.elmusic = {
+      play: () => {
+        if (!st.current.queue.length) return;
+        wantRef.current = true;
+        if (yt.active) ytResume();
+        else getAudio().play().catch(() => {});
+      },
+      pause: () => {
+        wantRef.current = false;
+        if (yt.active) ytPause();
+        else getAudio().pause();
+      },
+      next: () => nextRef.current(false),
+      prev: () => prev(),
+    };
+  }, [prev]);
+  useEffect(() => {
+    if (!window.ElMusic || !window.ElMusic.postMessage) return;
+    try {
+      window.ElMusic.postMessage(
+        JSON.stringify({ playing, title: current?.title || '', artist: current?.artist || '', art: current?.art || '' })
+      );
+    } catch {}
+  }, [playing, current]);
 
   const value = {
     queue, index, current, playing, buffering, error,
