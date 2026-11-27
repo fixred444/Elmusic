@@ -352,3 +352,51 @@ button:focus-visible, a:focus-visible, .row:focus-visible, .card:focus-visible {
   .lyr-l { font-size: 22px; }
   .np-art { width: min(78%, 330px); }
 }
+
+/* ---------- layar awal: daftar / masuk ---------- */
+.splash { min-height: 100dvh; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 26px; letter-spacing: -0.03em; }
+.auth { min-height: 100dvh; display: grid; grid-template-columns: 1fr; background: var(--bg); }
+.auth-visual { display: none; position: relative; overflow: hidden; background: radial-gradient(70% 50% at 30% 10%, #2a2a31, var(--bg) 75%); }
+.auth-covers { position: absolute; inset: 0; margin: auto; width: min(78%, 520px); height: fit-content; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-content: center; transform: rotate(-6deg); top: 0; bottom: 0; }
+.auth-cover { aspect-ratio: 1; border-radius: 10px; overflow: hidden; opacity: 0; animation: rise 0.6s var(--ease) forwards; animation-delay: var(--d); box-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.8); }
+.auth-cover:nth-child(3n + 2) { transform: translateY(26px); }
+.auth-cover img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes rise { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+.auth-panel { display: flex; align-items: center; justify-content: center; padding: 28px 22px; min-height: 100dvh; }
+.auth-inner { width: 100%; max-width: 400px; }
+.auth-brand { display: flex; align-items: baseline; gap: 6px; font-weight: 800; font-size: 26px; letter-spacing: -0.03em; margin-bottom: 36px; }
+.auth-title { font-weight: 800; font-size: clamp(28px, 4vw, 36px); letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 10px; text-wrap: balance; }
+.auth-sub { color: var(--ink-2); margin-bottom: 28px; }
+.auth-actions { display: grid; gap: 10px; margin-bottom: 18px; }
+.auth-btn { width: 100%; height: 50px; border-radius: 25px; font-size: 15px; margin-top: 4px; }
+.auth-btn:disabled { opacity: 0.5; }
+.auth-link { display: block; margin: 14px auto 0; color: var(--ink-2); font-weight: 600; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.auth-link:hover { color: var(--ink); }
+.auth-link.inline { display: inline; margin: 0; color: var(--ink); }
+.auth-back { color: var(--ink-2); font-weight: 600; font-size: 14px; margin-bottom: 18px; display: block; }
+.auth-switch { text-align: center; color: var(--ink-2); font-size: 14px; margin-top: 18px; }
+.auth-note { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--ink-2); margin: 14px 0; }
+.auth-err { color: #ff9a8a; font-size: 14px; margin: 4px 0 8px; }
+.auth-ok { width: 52px; height: 52px; border-radius: 50%; background: #fff; color: #111; display: grid; place-items: center; margin-bottom: 20px; }
+.field { display: block; margin-top: 16px; }
+.field > span { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.field input { width: 100%; height: 50px; padding: 0 16px; border-radius: 10px; border: 1px solid transparent; outline: 0; background: var(--surface-2); font-size: 16px; transition: border-color 0.15s; }
+.field input:focus { border-color: rgba(255, 255, 255, 0.55); }
+.field input::placeholder { color: var(--ink-3); }
+.field-pw { position: relative; }
+.field-pw input { padding-right: 48px; }
+.field-pw .ic { position: absolute; right: 8px; top: 9px; }
+
+@media (min-width: 900px) {
+  .auth { grid-template-columns: 1.05fr 1fr; }
+  .auth-visual { display: block; }
+}
+
+/* kartu akun */
+.acct { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 12px; background: var(--surface-2); margin-top: 10px; }
+.acct-av { width: 36px; height: 36px; border-radius: 50%; background: #fff; color: #111; display: grid; place-items: center; font-weight: 800; flex: none; }
+.acct-t { display: grid; min-width: 0; flex: 1; }
+.acct-t b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct-t small { font-size: 12px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acct-m { display: none; margin-bottom: 20px; }
+@media (max-width: 860px) { .acct-m { display: block; } .acct-m .acct { margin-top: 0; background: var(--surface); } }

@@ -1,5 +1,7 @@
 import './globals.css';
 import { AppProvider } from '@/lib/store';
+import { AuthProvider } from '@/lib/auth';
+import AuthGate from '@/components/AuthGate';
 import Shell from '@/components/Shell';
 
 export const metadata = {
@@ -27,9 +29,13 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <AppProvider>
-          <Shell>{children}</Shell>
-        </AppProvider>
+        <AuthProvider>
+          <AuthGate>
+            <AppProvider>
+              <Shell>{children}</Shell>
+            </AppProvider>
+          </AuthGate>
+        </AuthProvider>
       </body>
     </html>
   );
