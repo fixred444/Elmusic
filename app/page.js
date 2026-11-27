@@ -5,6 +5,7 @@ import { useApp } from '@/lib/store';
 import { greeting } from '@/lib/util';
 import Art from '@/components/Art';
 import Shelf, { ShelfSkeleton } from '@/components/Shelf';
+import { fetchHome as loadHome, readHomeCache } from '@/lib/homeCache';
 
 export default function Home() {
   const { play, recent } = useApp();
@@ -15,16 +16,20 @@ export default function Home() {
 
   const fetchHome = useCallback(() => {
     setFailed(false);
-    setShelves(null);
-    fetch('/api/home')
-      .then((r) => r.json())
+    const cached = readHomeCache();
+    if (cached) {
+      // tampil seketika dari data tersimpan, lalu diperbarui di belakang
+      setSource(cached.source || 'audius');
+      setShelves(cached.shelves);
+    } else setShelves(null);
+    loadHome()
       .then((d) => {
         if (d.shelves?.length) {
           setSource(d.source || 'audius');
           setShelves(d.shelves);
-        } else setFailed(true);
+        } else if (!cached) setFailed(true);
       })
-      .catch(() => setFailed(true));
+      .catch(() => { if (!cached) setFailed(true); });
   }, []);
 
   useEffect(() => {
