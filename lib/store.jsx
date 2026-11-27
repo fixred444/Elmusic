@@ -42,15 +42,18 @@ function TimeProvider({ children }) {
     const a = getAudio();
     const upd = () => {
       if (yt.active) return;
-      setS({ time: a.currentTime || 0, duration: isFinite(a.duration) ? a.duration : 0 });
+      const time = Math.floor((a.currentTime || 0) * 2) / 2; // 2x per detik cukup, kurangi render ulang
+      const duration = isFinite(a.duration) ? a.duration : 0;
+      setS((p) => (p.time === time && p.duration === duration ? p : { time, duration }));
     };
     const evs = ['timeupdate', 'loadedmetadata', 'durationchange', 'emptied'];
     evs.forEach((e) => a.addEventListener(e, upd));
     const iv = setInterval(() => {
       if (!yt.active) return;
       const n = ytTime();
-      setS((p) => (p.time === n.time && p.duration === n.duration ? p : n));
-    }, 250);
+      const time = Math.floor((n.time || 0) * 2) / 2;
+      setS((p) => (p.time === time && p.duration === n.duration ? p : { time, duration: n.duration }));
+    }, 500);
     return () => {
       evs.forEach((e) => a.removeEventListener(e, upd));
       clearInterval(iv);
