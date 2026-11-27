@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useRef } from 'react';
 import { useApp } from '@/lib/store';
 import Cover from './Cover';
+import AccountChip from './AccountChip';
 import { IconHeart, IconHome, IconLibrary, IconPlus, IconSearch, IconUpload } from './Icons';
 
 export function Logo() {
@@ -75,6 +76,7 @@ export default function Sidebar() {
         ))}
       </div>
 
+      <AccountChip />
       <button className="btn btn-ghost side-upload" onClick={() => fileRef.current?.click()}>
         <IconUpload size={18} /> Dari perangkat
       </button>

@@ -39,6 +39,8 @@ export const IconClose = mk(<path d="M6 6l12 12M18 6 6 18" />);
 export const IconCheck = mk(<path d="m5 12.5 4.5 4.5L19 7.5" />);
 export const IconNote = mk(<path d="M9 18V6l10-2v12M9 18a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0zm10-2a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />);
 export const IconMic = mk(<><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z" /><path d="M6.5 11a5.5 5.5 0 0 0 11 0M12 16.5V20" /></>);
+export const IconEye = mk(<><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" /><circle cx="12" cy="12" r="2.8" /></>);
+export const IconEyeOff = mk(<><path d="M2 12s3.6-6.5 10-6.5c2 0 3.7.6 5.2 1.4M22 12s-3.6 6.5-10 6.5c-2 0-3.7-.6-5.2-1.4" /><path d="M9.9 9.9a2.8 2.8 0 0 0 4.2 4.2M3 3l18 18" /></>);
 export const IconMore = mk(<><circle cx="5.5" cy="12" r="1.4" /><circle cx="12" cy="12" r="1.4" /><circle cx="18.5" cy="12" r="1.4" /></>, solid);
 
 export function IconHeart({ filled = false, size = 22, ...p }) {
