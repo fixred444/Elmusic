@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useAuth } from './auth';
 import { yt, ytWarm, ytPlay, ytPause, ytResume, ytStop, ytSeek, ytVolume, ytState, ytTime } from './yt';
 
 const AppCtx = createContext(null);
@@ -59,6 +60,9 @@ function TimeProvider({ children }) {
 }
 
 export function AppProvider({ children }) {
+  const { uid } = useAuth();
+  // tamu memakai kunci lama; tiap akun punya penyimpanan sendiri di perangkat ini
+  const keyOf = (n) => (uid === 'guest' ? `elmusic:${n}` : `elmusic:u:${uid}:${n}`);
   const [queue, setQueue] = useState([]);
   const [index, setIndex] = useState(-1);
   const [playing, setPlaying] = useState(false);
@@ -75,7 +79,7 @@ export function AppProvider({ children }) {
   const [expanded, setExpanded] = useState(false);
   const [npTab, setNpTab] = useState('lirik');
   const [menu, setMenu] = useState(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(null); // berisi uid yang datanya sudah dimuat
 
   const st = useRef({});
   st.current = { queue, index, repeat, shuffle, volume, muted };
@@ -113,18 +117,28 @@ export function AppProvider({ children }) {
 
   // ---- hydrate + persist
   useEffect(() => {
-    setLiked(load('elmusic:liked', []));
-    setPlaylists(load('elmusic:playlists', []));
-    setRecent(load('elmusic:recent', []));
+    // ganti akun: hentikan pemutaran dan muat data milik akun ini
+    const a = getAudio();
+    if (a) a.pause();
+    ytStop();
+    setQueue([]);
+    setIndex(-1);
+    setPlaying(false);
+    setExpanded(false);
+    setLiked(load(keyOf('liked'), []));
+    setPlaylists(load(keyOf('playlists'), []));
+    setRecent(load(keyOf('recent'), []));
     setVolumeState(load('elmusic:volume', 0.8));
-    setHydrated(true);
-  }, []);
-  useEffect(() => { if (hydrated) save('elmusic:liked', noLocal(liked)); }, [liked, hydrated]);
+    setHydrated(uid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid]);
+  const ready = hydrated === uid;
+  useEffect(() => { if (ready) save(keyOf('liked'), noLocal(liked)); }, [liked, ready]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (hydrated) save('elmusic:playlists', playlists.map((p) => ({ ...p, tracks: noLocal(p.tracks) })));
-  }, [playlists, hydrated]);
-  useEffect(() => { if (hydrated) save('elmusic:recent', noLocal(recent)); }, [recent, hydrated]);
-  useEffect(() => { if (hydrated) save('elmusic:volume', volume); }, [volume, hydrated]);
+    if (ready) save(keyOf('playlists'), playlists.map((p) => ({ ...p, tracks: noLocal(p.tracks) })));
+  }, [playlists, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready) save(keyOf('recent'), noLocal(recent)); }, [recent, ready]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (ready) save('elmusic:volume', volume); }, [volume, ready]);
 
   // ---- audio element
   useEffect(() => {
